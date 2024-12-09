@@ -1,37 +1,32 @@
-import Product from "../models/product.model.js";
 import mongoose from "mongoose";
+import Product from "../models/product.model.js";
 
 export const getProducts = async (req, res) => {
-  try {
-    const products = await Product.find({});
-    res.status(201).json({ success: true, data: products });
-  } catch (error) {
-    console.error("Error retrieving products:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
+	try {
+		const products = await Product.find({});
+		res.status(200).json({ success: true, data: products });
+	} catch (error) {
+		console.log("error in fetching products:", error.message);
+		res.status(500).json({ success: false, message: "Server Error" });
+	}
 };
 
-export const createProducts = async (req, res) => {
-  try {
-    const product = req.body;
-    console.log("Received product data:", product); // Add logging
+export const createProduct = async (req, res) => {
+	const product = req.body; // user will send this data
 
-    if (!product.name || !product.price || !product.image) {
-      console.log("Validation failed:", { product }); // Add logging
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid product data" });
-    }
+	if (!product.name || !product.price || !product.image) {
+		return res.status(400).json({ success: false, message: "Please provide all fields" });
+	}
 
-    const newProduct = new Product(product);
-    const savedProduct = await newProduct.save();
-    console.log("Product saved successfully:", savedProduct); // Add logging
+	const newProduct = new Product(product);
 
-    res.status(201).json({ success: true, data: savedProduct });
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
+	try {
+		await newProduct.save();
+		res.status(201).json({ success: true, data: newProduct });
+	} catch (error) {
+		console.error("Error in Create product:", error.message);
+		res.status(500).json({ success: false, message: "Server Error" });
+	}
 };
 
 export const updateProduct = async (req, res) => {
